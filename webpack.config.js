@@ -1,3 +1,5 @@
+const Dotenv = require('dotenv-webpack');
+
 var webpack = require('webpack'),
   path = require('path'),
   fileSystem = require('fs-extra'),
@@ -11,6 +13,8 @@ const ASSET_PATH = process.env.ASSET_PATH || '/';
 
 var alias = {
   'react-dom': '@hot-loader/react-dom',
+  "buffer": "buffer",
+  "stream": "stream-browserify",
 };
 
 // load the secrets
@@ -36,7 +40,7 @@ if (fileSystem.existsSync(secretsPath)) {
 var options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    newtab: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.jsx'),
+    // newtab: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.jsx'),
     options: path.join(__dirname, 'src', 'pages', 'Options', 'index.jsx'),
     popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.jsx'),
     background: path.join(__dirname, 'src', 'pages', 'Background', 'index.js'),
@@ -108,8 +112,26 @@ var options = {
     extensions: fileExtensions
       .map((extension) => '.' + extension)
       .concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
+    modules: ["node_modules", path.resolve(__dirname, "app")],
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "https": require.resolve("https-browserify"),
+      "http": require.resolve("stream-http"),
+      "stream": require.resolve("stream-browserify"),
+      "buffer": require.resolve("buffer/"),
+      "zlib": require.resolve("browserify-zlib"),
+      "fs": false,
+      "path": require.resolve("path-browserify"),
+    }
   },
   plugins: [
+    new Dotenv(),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new CleanWebpackPlugin({ verbose: false }),
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
@@ -160,12 +182,12 @@ var options = {
         },
       ],
     }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.html'),
-      filename: 'newtab.html',
-      chunks: ['newtab'],
-      cache: false,
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.html'),
+    //   filename: 'newtab.html',
+    //   chunks: ['newtab'],
+    //   cache: false,
+    // }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'Options', 'index.html'),
       filename: 'options.html',
