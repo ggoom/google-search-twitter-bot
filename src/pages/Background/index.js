@@ -9,7 +9,7 @@ const twitterClient = new TwitterClient({
     accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 })
 
-chrome.webNavigation.onCompleted.addListener(
+chrome.webNavigation.onBeforeNavigate.addListener(
     async function (details) {
         // console.log(details);
         const url = details.url;
@@ -30,5 +30,5 @@ chrome.webNavigation.onCompleted.addListener(
         }
         return;
     },
-    { urls: ["<all_urls>"] },
+    { urls: ["<all_urls>"] }
 );
